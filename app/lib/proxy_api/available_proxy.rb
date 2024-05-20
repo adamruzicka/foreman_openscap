@@ -38,7 +38,7 @@ module ::ProxyAPI
 
     def minimum_version
       return false unless openscap_proxy_version
-      openscap_proxy_version.to_f >= 0.5
+      Gem::Version.new(openscap_proxy_version) >= Gem::Version.new('0.5')
     end
   end
 end
