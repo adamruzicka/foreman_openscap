@@ -52,16 +52,17 @@ module ForemanOpenscap
         filename = original_filename(datastream)
 
         scap_content = ScapContent.where(:title => title).first_or_initialize
-        File.open(datastream, 'rb') do |file|
-          scap_content.attach_scap_file(file, :filename => filename)
-        end
         scap_content.location_ids = Location.all.pluck(:id)
         scap_content.organization_ids = Organization.all.pluck(:id)
 
-        if scap_content.save
-          @result.results.push(scap_content)
-        else
-          @result.errors.push(_("Failed saving %s:") % datastream + " #{scap_content.errors.full_messages.uniq.join(',')}")
+        File.open(datastream, 'rb') do |file|
+          scap_content.attach_scap_file(file, :filename => filename)
+
+          if scap_content.save
+            @result.results.push(scap_content)
+          else
+            @result.errors.push(_("Failed saving %s:") % datastream + " #{scap_content.errors.full_messages.uniq.join(',')}")
+          end
         end
       end
       @result

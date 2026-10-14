@@ -14,6 +14,9 @@ module ForemanOpenscap
     delegate :attached?, :to => :scap_file, :prefix => true
 
     def scap_file_contents
+      pending_io = attachment_changes['scap_file']&.attachable&.fetch(:io, nil)
+      return read_scap_file(pending_io) if pending_io
+
       scap_file.download if scap_file_attached?
     end
 
@@ -38,6 +41,11 @@ module ForemanOpenscap
     end
 
     private
+
+    def read_scap_file(io)
+      position = io.pos
+      io.read.tap { io.seek(position) }
+    end
 
     def scap_file_presence
       errors.add(:scap_file, :blank) unless scap_file_attached?

@@ -17,6 +17,12 @@ class ScapContentTest < ActiveSupport::TestCase
       assert(scap_content.valid?)
     end
 
+    test 'reads a pending attachment before it is committed' do
+      scap_content = build_scap_content
+
+      assert_equal @scap_file, scap_content.scap_file_contents
+    end
+
     test 'stores the file in ActiveStorage' do
       scap_content = build_scap_content
       assert scap_content.save
