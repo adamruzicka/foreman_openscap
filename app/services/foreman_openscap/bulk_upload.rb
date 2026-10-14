@@ -48,13 +48,13 @@ module ForemanOpenscap
           next
         end
 
-        file = File.read(datastream, mode: 'rb')
         title = content_name(datastream, from_scap_guide)
         filename = original_filename(datastream)
 
         scap_content = ScapContent.where(:title => title).first_or_initialize
-        scap_content.scap_file = file
-        scap_content.original_filename = filename
+        File.open(datastream, 'rb') do |file|
+          scap_content.attach_scap_file(file, :filename => filename)
+        end
         scap_content.location_ids = Location.all.pluck(:id)
         scap_content.organization_ids = Organization.all.pluck(:id)
 

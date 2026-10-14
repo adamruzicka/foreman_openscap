@@ -46,7 +46,8 @@ module Api::V2
       param_group :scap_content, :as => :create
 
       def create
-        @scap_content = ForemanOpenscap::ScapContent.new(scap_content_params)
+        @scap_content = ForemanOpenscap::ScapContent.new(scap_content_params.except(:scap_file))
+        attach_scap_file
         process_response @scap_content.save
       end
 
@@ -55,7 +56,9 @@ module Api::V2
       param_group :scap_content
 
       def update
-        process_response @scap_content.update(scap_content_params)
+        @scap_content.assign_attributes(scap_content_params.except(:scap_file))
+        attach_scap_file
+        process_response @scap_content.save
       end
 
       api :DELETE, '/compliance/scap_contents/:id', N_('Deletes an SCAP content')
@@ -93,6 +96,17 @@ module Api::V2
       def find_resource
         not_found && return if params[:id].blank?
         instance_variable_set("@scap_content", resource_scope.find(params[:id]))
+      end
+
+      def attach_scap_file
+        return unless params[:scap_content] && (raw_file = params[:scap_content][:scap_file])
+
+        if raw_file.respond_to?(:tempfile)
+          @scap_content.attach_scap_file(raw_file.tempfile, :filename => raw_file.original_filename)
+        else
+          filename = params[:scap_content][:original_filename] || "#{@scap_content.title}.xml"
+          @scap_content.attach_scap_file(StringIO.new(raw_file.to_s), :filename => filename)
+        end
       end
 
       def action_permission

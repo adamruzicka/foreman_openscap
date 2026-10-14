@@ -12,6 +12,10 @@ class BulkUploadTest < ActiveSupport::TestCase
         ForemanOpenscap::BulkUpload.new.upload_from_files(scap_files)
       end
     end
+
+    scap_content = ForemanOpenscap::ScapContent.last
+    assert scap_content.scap_file.attached?
+    assert_equal File.read(scap_files.first, :mode => 'rb'), scap_content.scap_file_contents
   end
 
   test 'upload_from_files should not crash when scap files are not array' do
@@ -73,7 +77,9 @@ class BulkUploadTest < ActiveSupport::TestCase
     assert_no_difference('ForemanOpenscap::ScapContent.count') do
       upload.upload_from_scap_guide
     end
-    new_digest = ForemanOpenscap::ScapContent.last.digest
-    refute_equal old_digest, new_digest
+    scap_content = ForemanOpenscap::ScapContent.last
+    new_digest = scap_content.digest
+    assert_not_equal old_digest, new_digest
+    assert_equal File.read(upload.files_from_guide.first, :mode => 'rb'), scap_content.scap_file_contents
   end
 end

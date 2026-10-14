@@ -2,7 +2,6 @@ class ScapContentsController < ApplicationController
   include Foreman::Controller::AutoCompleteSearch
   include Foreman::Controller::Parameters::ScapContent
 
-  before_action :handle_file_upload, :only => %i[create update]
   before_action :find_by_id, :only => %i[show edit update destroy]
 
   def model_of_controller
@@ -24,7 +23,8 @@ class ScapContentsController < ApplicationController
   end
 
   def create
-    @scap_content = ForemanOpenscap::ScapContent.new(scap_content_params)
+    @scap_content = ForemanOpenscap::ScapContent.new(scap_content_params.except(:scap_file))
+    attach_scap_file
     if @scap_content.save
       process_success
     else
@@ -33,7 +33,9 @@ class ScapContentsController < ApplicationController
   end
 
   def update
-    if @scap_content.update(scap_content_params)
+    @scap_content.assign_attributes(scap_content_params.except(:scap_file))
+    attach_scap_file
+    if @scap_content.save
       process_success
     else
       process_error
@@ -54,9 +56,14 @@ class ScapContentsController < ApplicationController
     @scap_content = resource_base.find(params[:id])
   end
 
-  def handle_file_upload
-    return unless params[:scap_content] && scap_raw_file = params[:scap_content][:scap_file]
-    params[:scap_content][:original_filename] = scap_raw_file.original_filename
-    params[:scap_content][:scap_file] = scap_raw_file.tempfile.read if scap_raw_file.tempfile.respond_to?(:read)
+  def attach_scap_file
+    return unless params[:scap_content] && (raw_file = params[:scap_content][:scap_file])
+
+    if raw_file.respond_to?(:tempfile)
+      @scap_content.attach_scap_file(raw_file.tempfile, :filename => raw_file.original_filename)
+    else
+      filename = params[:scap_content][:original_filename] || "#{@scap_content.title}.xml"
+      @scap_content.attach_scap_file(StringIO.new(raw_file.to_s), :filename => filename)
+    end
   end
 end
