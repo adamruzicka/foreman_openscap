@@ -17,7 +17,7 @@ module ForemanOpenscap
 
       begin
         api = ProxyAPI::Openscap.new(:url => data_stream_content.proxy_url)
-        errors = api.validate_scap_file(data_stream_content.scap_file, content_type)
+        errors = api.validate_scap_file(data_stream_content.scap_file_contents, content_type)
         if errors && errors['errors'].any?
           errors['errors'].each { |error| data_stream_content.errors.add(:scap_file, _(error)) }
           return false

@@ -77,7 +77,7 @@ module Api::V2
 
       def content
         @scap_content = @policy.scap_content
-        send_data @scap_content.scap_file,
+        send_data @scap_content.scap_file_contents,
                   :type     => 'application/xml',
                   :filename => @scap_content.original_filename
       end

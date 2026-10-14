@@ -13,7 +13,7 @@ class ScapContentsController < ApplicationController
   end
 
   def show
-    send_data @scap_content.scap_file,
+    send_data @scap_content.scap_file_contents,
               :type     => 'application/xml',
               :filename => @scap_content.original_filename
   end

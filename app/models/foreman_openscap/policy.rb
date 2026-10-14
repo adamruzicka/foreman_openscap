@@ -61,7 +61,7 @@ module ForemanOpenscap
         return html_error_message(_('Cannot generate HTML guide, no valid OpenSCAP proxy server found.'))
       end
 
-      api.policy_html_guide(scap_content.scap_file, scap_content_profile.try(:profile_id))
+      api.policy_html_guide(scap_content.scap_file_contents, scap_content_profile.try(:profile_id))
     end
 
     def change_deploy_type(params)

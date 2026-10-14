@@ -12,7 +12,8 @@ class Api::V2::Compliance::ScapContentsControllerTest < ActionController::TestCa
   test "should return xml of scap content" do
     scap_content = FactoryBot.create(:scap_content)
     get :show, :params => { :id => scap_content.id }, :session => set_session_user
-    assert(@response.header['Content-Type'], 'application/xml')
+    assert_equal 'application/xml', @response.media_type
+    assert_equal scap_content.scap_file_contents, @response.body
     assert_response :success
   end
 
@@ -44,6 +45,6 @@ class Api::V2::Compliance::ScapContentsControllerTest < ActionController::TestCa
     scap_content = FactoryBot.create(:scap_content)
     delete :destroy, :params => { :id => scap_content.id }, :session => set_session_user
     assert_response :ok
-    refute ForemanOpenscap::ScapContent.exists?(scap_content.id)
+    assert_not ForemanOpenscap::ScapContent.exists?(scap_content.id)
   end
 end

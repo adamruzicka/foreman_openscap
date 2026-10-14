@@ -23,7 +23,7 @@ module Api::V2
       param :id, :identifier, :required => true
 
       def xml
-        send_data @scap_content.scap_file,
+        send_data @scap_content.scap_file_contents,
                   :type     => 'application/xml',
                   :filename => @scap_content.original_filename || "#{@scap_content.title}.xml"
       end
