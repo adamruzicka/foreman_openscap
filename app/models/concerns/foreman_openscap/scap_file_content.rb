@@ -14,7 +14,7 @@ module ForemanOpenscap
     delegate :attached?, :to => :scap_file, :prefix => true
 
     def scap_file_contents
-      scap_file.download
+      scap_file.download if scap_file_attached?
     end
 
     def attach_scap_file(io, filename:)
@@ -31,7 +31,10 @@ module ForemanOpenscap
     end
 
     def digest
-      self[:digest] ||= Digest::SHA256.hexdigest(scap_file_contents)
+      return self[:digest] if self[:digest]
+      return unless scap_file_attached?
+
+      self[:digest] = Digest::SHA256.hexdigest(scap_file_contents)
     end
 
     private
@@ -41,6 +44,8 @@ module ForemanOpenscap
     end
 
     def redigest
+      return unless scap_file_attached?
+
       self[:digest] = Digest::SHA256.hexdigest(scap_file_contents)
     end
   end
