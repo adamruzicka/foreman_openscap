@@ -1,5 +1,7 @@
 module ForemanOpenscap
   class ScapContent < ApplicationRecord
+    has_one_attached :scap_file
+
     audited :except => [:scap_file]
     include Authorizable
     include Taxonomix
@@ -42,12 +44,12 @@ module ForemanOpenscap
 
     def as_json(*args)
       hash = super
-      hash["scap_file"] = scap_file.to_s.encode('utf-8', :invalid => :replace, :undef => :replace, :replace => '_')
+      hash["scap_file"] = scap_file_contents.encode('utf-8', :invalid => :replace, :undef => :replace, :replace => '_')
     end
 
     def fetch_profiles
       api = ProxyAPI::Openscap.new(:url => proxy_url)
-      profiles = api.fetch_policies_for_scap_content(scap_file)
+      profiles = api.fetch_policies_for_scap_content(scap_file_contents)
       profiles
     end
   end

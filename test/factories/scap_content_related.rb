@@ -4,7 +4,12 @@ FactoryBot.define do
   factory :scap_content, :class => ::ForemanOpenscap::ScapContent do |f|
     f.sequence(:title) { |n| "scap_content_title_#{n}" }
     f.original_filename { 'fedora ds' }
-    f.scap_file { File.new("#{ForemanOpenscap::Engine.root}/test/files/scap_contents/ssg-fedora-ds.xml", 'rb').read }
+
+    after(:build) do |scap_content|
+      File.open("#{ForemanOpenscap::Engine.root}/test/files/scap_contents/ssg-fedora-ds.xml", 'rb') do |file|
+        scap_content.attach_scap_file(file, :filename => scap_content.original_filename)
+      end
+    end
   end
 
   factory :scap_content_profile, :class => ::ForemanOpenscap::ScapContentProfile do |f|
